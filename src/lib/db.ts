@@ -30,13 +30,16 @@ export async function query(text: string, params?: any[]) {
 }
 
 export async function createTables() {
-  // Create users table
+  // Create users table with role
   await query(`
     CREATE TABLE IF NOT EXISTS users (
       id SERIAL PRIMARY KEY,
       email VARCHAR(255) UNIQUE NOT NULL,
       password VARCHAR(255) NOT NULL,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      name VARCHAR(255),
+      role VARCHAR(50) DEFAULT 'author',
+      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `);
 
@@ -50,24 +53,12 @@ export async function createTables() {
       excerpt TEXT,
       tags TEXT[] DEFAULT '{}',
       author VARCHAR(255) DEFAULT 'Admin',
+      author_id INTEGER REFERENCES users(id),
       published BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `);
-
-  // Add missing columns if they don't exist
-  try {
-    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';`);
-  } catch (e) {
-    // Column might already exist
-  }
-  
-  try {
-    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author VARCHAR(255) DEFAULT 'Admin';`);
-  } catch (e) {
-    // Column might already exist
-  }
 
   // Create subscribers table for newsletter
   await query(`
@@ -77,6 +68,27 @@ export async function createTables() {
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );
   `);
+
+  // Add missing columns if they don't exist
+  try {
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(255);`);
+  } catch (e) { /* ignore */ }
+  
+  try {
+    await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'author';`);
+  } catch (e) { /* ignore */ }
+
+  try {
+    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author_id INTEGER REFERENCES users(id);`);
+  } catch (e) { /* ignore */ }
+
+  try {
+    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';`);
+  } catch (e) { /* ignore */ }
+  
+  try {
+    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author VARCHAR(255) DEFAULT 'Admin';`);
+  } catch (e) { /* ignore */ }
 
   console.log('Tables created/migrated successfully');
 }

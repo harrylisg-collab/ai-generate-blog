@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function AdminClient({ posts, subscribers }: Props) {
-  const [tab, setTab] = useState<"posts" | "subscribers">("posts");
+  const [tab, setTab] = useState<"posts" | "subscribers" | "users">("posts");
 
   return (
     <div className="min-h-screen">
@@ -67,6 +67,21 @@ export default function AdminClient({ posts, subscribers }: Props) {
               }}
             >
               Subscribers
+            </button>
+            <button 
+              onClick={() => setTab("users")}
+              style={{ 
+                padding: '0.5rem 0.75rem', 
+                borderRadius: '4px', 
+                background: tab === 'users' ? 'var(--color-background)' : 'transparent',
+                fontWeight: tab === 'users' ? 500 : 400,
+                border: 'none',
+                textAlign: 'left',
+                cursor: 'pointer',
+                color: 'var(--color-text)'
+              }}
+            >
+              Users
             </button>
             <Link href="/admin/new" style={{ padding: '0.5rem 0.75rem', borderRadius: '4px', color: 'var(--color-secondary)' }}>
               + New Post
@@ -118,6 +133,18 @@ export default function AdminClient({ posts, subscribers }: Props) {
                   </tbody>
                 </table>
               )}
+            </>
+          ) : tab === "users" ? (
+            <>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
+                <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem' }}>Users</h1>
+                <Link href="/admin/users" className="btn-primary">
+                  Manage Users
+                </Link>
+              </div>
+              <p style={{ color: 'var(--color-secondary)' }}>
+                Click "Manage Users" to add, edit, or remove users.
+              </p>
             </>
           ) : (
             <>
