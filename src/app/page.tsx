@@ -35,6 +35,7 @@ export default async function Home() {
                     month: 'long',
                     day: 'numeric'
                   })}
+                  <span> · {post.author || 'Admin'}</span>
                   {post.excerpt && (
                     <span> · {Math.ceil(post.excerpt.split(/\s+/).length / 200)} min read</span>
                   )}

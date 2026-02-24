@@ -15,6 +15,7 @@ interface Post {
   slug: string;
   content: string;
   excerpt: string | null;
+  author: string;
   published: boolean;
 }
 
@@ -24,6 +25,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
   const [loading, setLoading] = useState(true);
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [author, setAuthor] = useState("Admin");
   const [content, setContent] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [published, setPublished] = useState(false);
@@ -41,6 +43,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
         setPost(data);
         setTitle(data.title);
         setSlug(data.slug);
+        setAuthor(data.author || "Admin");
         setContent(data.content);
         setExcerpt(data.excerpt || "");
         setPublished(data.published);
@@ -70,7 +73,7 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
       const res = await fetch("/api/posts", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: parseInt(id), title, slug, content, excerpt, published }),
+        body: JSON.stringify({ id: parseInt(id), title, slug, author, content, excerpt, published }),
       });
 
       const data = await res.json();
@@ -130,6 +133,11 @@ export default function EditPostPage({ params }: { params: Promise<{ id: string 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Slug</label>
               <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} required style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }} />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Author</label>
+              <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Admin" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>

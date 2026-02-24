@@ -27,7 +27,7 @@ export async function createTables() {
     );
   `);
 
-  // Create posts table with tags
+  // Create posts table with tags and author
   await query(`
     CREATE TABLE IF NOT EXISTS posts (
       id SERIAL PRIMARY KEY,
@@ -36,6 +36,7 @@ export async function createTables() {
       content TEXT NOT NULL,
       excerpt TEXT,
       tags TEXT[] DEFAULT '{}',
+      author VARCHAR(255) DEFAULT 'Admin',
       published BOOLEAN DEFAULT FALSE,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
       updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP

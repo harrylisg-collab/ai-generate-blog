@@ -3,6 +3,8 @@ import { getPostsByTag } from "@/lib/posts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   params: { tag: string };
 }

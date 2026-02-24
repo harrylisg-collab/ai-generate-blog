@@ -3,6 +3,8 @@ import { searchPosts } from "@/lib/posts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
+export const dynamic = 'force-dynamic';
+
 interface Props {
   searchParams: { q?: string };
 }

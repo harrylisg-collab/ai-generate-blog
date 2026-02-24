@@ -7,6 +7,7 @@ export interface Post {
   content: string;
   excerpt: string | null;
   tags: string[];
+  author: string;
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -48,11 +49,12 @@ export async function createPost(
   slug: string,
   excerpt: string | null = null,
   tags: string[] = [],
+  author: string = 'Admin',
   published: boolean = false
 ): Promise<Post> {
   const result = await dbQuery(
-    'INSERT INTO posts (title, content, slug, excerpt, tags, published) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-    [title, content, slug, excerpt, tags, published]
+    'INSERT INTO posts (title, content, slug, excerpt, tags, author, published) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+    [title, content, slug, excerpt, tags, author, published]
   );
   return result.rows[0];
 }
@@ -64,14 +66,15 @@ export async function updatePost(
   slug: string,
   excerpt: string | null = null,
   tags: string[] = [],
+  author: string = 'Admin',
   published: boolean = false
 ): Promise<Post> {
   const result = await dbQuery(
     `UPDATE posts 
-     SET title = $1, content = $2, slug = $3, excerpt = $4, tags = $5, published = $6, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $7
+     SET title = $1, content = $2, slug = $3, excerpt = $4, tags = $5, author = $6, published = $7, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $8
      RETURNING *`,
-    [title, content, slug, excerpt, tags, published, id]
+    [title, content, slug, excerpt, tags, author, published, id]
   );
   return result.rows[0];
 }

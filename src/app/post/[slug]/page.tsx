@@ -55,7 +55,7 @@ export default async function PostPage({ params }: Props) {
     "dateModified": post.updated_at,
     "author": {
       "@type": "Person",
-      "name": "Admin"
+      name: post.author || "Admin"
     },
     "url": postUrl,
   };
@@ -95,6 +95,7 @@ export default async function PostPage({ params }: Props) {
                   day: 'numeric'
                 })}
               </span>
+              <span>· {post.author || 'Admin'}</span>
               <span>· {readingTime} min read</span>
               <ShareButton title={post.title} url={postUrl} />
             </div>

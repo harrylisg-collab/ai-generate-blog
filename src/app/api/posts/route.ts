@@ -21,13 +21,22 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { title, content, slug, excerpt, published } = body;
+    const { title, content, slug, excerpt, tags, author, published } = body;
 
     if (!title || !content || !slug) {
       return NextResponse.json({ error: "Title, content, and slug are required" }, { status: 400 });
     }
 
-    const post = await createPost(title, content, slug, excerpt || null, published || false);
+    const post = await createPost(
+      title, 
+      content, 
+      slug, 
+      excerpt || null, 
+      tags || [], 
+      author || 'Admin', 
+      published || false
+    );
+
     return NextResponse.json(post);
   } catch (error: any) {
     if (error.code === '23505') {
@@ -40,13 +49,23 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, title, content, slug, excerpt, published } = body;
+    const { id, title, content, slug, excerpt, tags, author, published } = body;
 
     if (!id || !title || !content || !slug) {
       return NextResponse.json({ error: "ID, title, content, and slug are required" }, { status: 400 });
     }
 
-    const post = await updatePost(id, title, content, slug, excerpt || null, published || false);
+    const post = await updatePost(
+      id, 
+      title, 
+      content, 
+      slug, 
+      excerpt || null, 
+      tags || [], 
+      author || 'Admin', 
+      published || false
+    );
+
     return NextResponse.json(post);
   } catch (error: any) {
     if (error.code === '23505') {

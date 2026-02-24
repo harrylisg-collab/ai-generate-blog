@@ -13,6 +13,7 @@ export default function NewPostPage() {
   const router = useRouter();
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
+  const [author, setAuthor] = useState("Admin");
   const [content, setContent] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [published, setPublished] = useState(false);
@@ -35,7 +36,7 @@ export default function NewPostPage() {
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, slug, content, excerpt, published }),
+        body: JSON.stringify({ title, slug, author, content, excerpt, published }),
       });
 
       const data = await res.json();
@@ -75,6 +76,11 @@ export default function NewPostPage() {
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Slug</label>
               <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} required style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }} />
+            </div>
+
+            <div style={{ marginBottom: '1.5rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Author</label>
+              <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Admin" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>

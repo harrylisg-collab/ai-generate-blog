@@ -1,10 +1,14 @@
 import { getPublishedPosts } from "@/lib/posts";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
-  const posts = await getPublishedPosts();
   const siteUrl = process.env.NEXTAUTH_URL || 'https://example.com';
 
-  const rss = `<?xml version="1.0" encoding="UTF-8" ?>
+  try {
+    const posts = await getPublishedPosts();
+
+    const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>AI Generate Blog System</title>
@@ -25,10 +29,15 @@ export async function GET() {
   </channel>
 </rss>`;
 
-  return new Response(rss, {
-    headers: {
-      'Content-Type': 'application/xml',
-      'Cache-Control': 's-maxage=3600, stale-while-revalidate',
-    },
-  });
+    return new Response(rss, {
+      headers: {
+        'Content-Type': 'application/xml',
+        'Cache-Control': 's-maxage=3600, stale-while-revalidate',
+      },
+    });
+  } catch (error) {
+    return new Response('<?xml version="1.0"?><rss version="2.0"></rss>', {
+      headers: { 'Content-Type': 'application/xml' },
+    });
+  }
 }
