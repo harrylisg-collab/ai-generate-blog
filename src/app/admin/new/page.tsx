@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/Header";
 
 function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^\w\s-]/g, "").replace(/\s+/g, "-").replace(/--+/g, "-").trim();
+  return text
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/--+/g, "-")
+    .trim();
 }
 
 export default function NewPostPage() {
@@ -22,6 +27,7 @@ export default function NewPostPage() {
 
   const handleTitleChange = (value: string) => {
     setTitle(value);
+    // Only auto-generate slug if user hasn't manually edited it
     if (!slug || slug === slugify(title)) {
       setSlug(slugify(value));
     }
@@ -33,16 +39,33 @@ export default function NewPostPage() {
     setSaving(true);
 
     try {
+      const payload = {
+        title,
+        slug: slug || slugify(title),
+        author: author || "Admin",
+        content,
+        excerpt: excerpt || null,
+        published,
+      };
+
+      console.log("Submitting post:", payload);
+
       const res = await fetch("/api/posts", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title, slug, author, content, excerpt, published }),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to create post");
+      console.log("Response:", res.status, data);
+
+      if (!res.ok) {
+        throw new Error(data.error || `Failed to create post (${res.status})`);
+      }
+
       router.push("/admin");
     } catch (err: any) {
+      console.error("Submit error:", err);
       setError(err.message);
     } finally {
       setSaving(false);
@@ -67,46 +90,94 @@ export default function NewPostPage() {
         <main style={{ flex: 1, marginLeft: '250px', padding: '2rem', maxWidth: 'calc(100% - 250px)' }}>
           <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', marginBottom: '2rem' }}>New Post</h1>
 
+          {error && (
+            <div style={{ padding: '1rem', background: '#fee2e2', borderRadius: '4px', color: '#dc2626', marginBottom: '1rem' }}>
+              Error: {error}
+            </div>
+          )}
+
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Title</label>
-              <input type="text" value={title} onChange={(e) => handleTitleChange(e.target.value)} required style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} />
+              <input 
+                type="text" 
+                value={title} 
+                onChange={(e) => handleTitleChange(e.target.value)} 
+                required 
+                style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} 
+              />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Slug</label>
-              <input type="text" value={slug} onChange={(e) => setSlug(e.target.value)} required style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }} />
+              <input 
+                type="text" 
+                value={slug} 
+                onChange={(e) => setSlug(e.target.value)} 
+                required 
+                placeholder="auto-generated-from-title"
+                style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)' }} 
+              />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Author</label>
-              <input type="text" value={author} onChange={(e) => setAuthor(e.target.value)} placeholder="Admin" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} />
+              <input 
+                type="text" 
+                value={author} 
+                onChange={(e) => setAuthor(e.target.value)} 
+                placeholder="Admin" 
+                style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} 
+              />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Excerpt</label>
-              <input type="text" value={excerpt} onChange={(e) => setExcerpt(e.target.value)} placeholder="Brief description for SEO and previews" style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} />
+              <input 
+                type="text" 
+                value={excerpt} 
+                onChange={(e) => setExcerpt(e.target.value)} 
+                placeholder="Brief description for SEO and previews" 
+                style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)' }} 
+              />
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
               <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 500 }}>Content (Markdown)</label>
-              <textarea value={content} onChange={(e) => setContent(e.target.value)} required rows={20} style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)', resize: 'vertical' }} />
+              <textarea 
+                value={content} 
+                onChange={(e) => setContent(e.target.value)} 
+                required 
+                rows={20} 
+                style={{ width: '100%', padding: '0.75rem', fontSize: '1rem', border: '1px solid var(--color-border)', borderRadius: '4px', background: 'var(--color-surface)', color: 'var(--color-text)', fontFamily: 'var(--font-mono)', resize: 'vertical' }} 
+              />
             </div>
 
             <div style={{ marginBottom: '2rem' }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
+                <input 
+                  type="checkbox" 
+                  checked={published} 
+                  onChange={(e) => setPublished(e.target.checked)} 
+                />
                 <span>Publish immediately</span>
               </label>
             </div>
 
-            {error && <p style={{ color: '#dc2626', marginBottom: '1rem' }}>{error}</p>}
-
             <div style={{ display: 'flex', gap: '1rem' }}>
-              <button type="submit" disabled={saving} className="btn-primary">
+              <button 
+                type="submit" 
+                disabled={saving} 
+                className="btn-primary"
+              >
                 {saving ? "Saving..." : "Save Post"}
               </button>
-              <Link href="/admin" style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', color: 'var(--color-secondary)', border: '1px solid var(--color-border)', borderRadius: '4px' }}>Cancel</Link>
+              <Link 
+                href="/admin" 
+                style={{ padding: '0.75rem 1.5rem', fontSize: '1rem', color: 'var(--color-secondary)', border: '1px solid var(--color-border)', borderRadius: '4px' }}
+              >
+                Cancel
+              </Link>
             </div>
           </form>
         </main>
