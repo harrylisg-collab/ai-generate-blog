@@ -10,7 +10,8 @@
     "test": "vitest",
     "test:run": "vitest --run",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:api": "vitest --run tests/api.test.ts"
   },
   "dependencies": {
     "@types/pg": "^8.16.0",
@@ -36,10 +37,12 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-syntax-highlighter": "^15.5.13",
+    "@types/supertest": "^6.0.3",
     "@vitejs/plugin-react": "^5.1.4",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "jsdom": "^28.1.0",
+    "supertest": "^7.2.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",
     "typescript": "^5",
