@@ -29,47 +29,28 @@ export async function query(text: string, params?: any[]) {
   }
 }
 
-export async function createTables() {
-  // Create users table with role
-  await query(`
-    CREATE TABLE IF NOT EXISTS users (
-      id SERIAL PRIMARY KEY,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      password VARCHAR(255) NOT NULL,
-      name VARCHAR(255),
-      role VARCHAR(50) DEFAULT 'author',
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
+export async function migrate() {
+  console.log('Running database migration...');
+  
+  // Create users table
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        name VARCHAR(255),
+        role VARCHAR(50) DEFAULT 'author',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('Users table ready');
+  } catch (e: any) {
+    console.error('Users table error:', e.message);
+  }
 
-  // Create posts table with tags and author
-  await query(`
-    CREATE TABLE IF NOT EXISTS posts (
-      id SERIAL PRIMARY KEY,
-      title VARCHAR(255) NOT NULL,
-      slug VARCHAR(255) UNIQUE NOT NULL,
-      content TEXT NOT NULL,
-      excerpt TEXT,
-      tags TEXT[] DEFAULT '{}',
-      author VARCHAR(255) DEFAULT 'Admin',
-      author_id INTEGER REFERENCES users(id),
-      published BOOLEAN DEFAULT FALSE,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-      updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // Create subscribers table for newsletter
-  await query(`
-    CREATE TABLE IF NOT EXISTS subscribers (
-      id SERIAL PRIMARY KEY,
-      email VARCHAR(255) UNIQUE NOT NULL,
-      created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // Add missing columns if they don't exist
+  // Add missing columns to users
   try {
     await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS name VARCHAR(255);`);
   } catch (e) { /* ignore */ }
@@ -78,20 +59,56 @@ export async function createTables() {
     await query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'author';`);
   } catch (e) { /* ignore */ }
 
+  // Create posts table
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS posts (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) UNIQUE NOT NULL,
+        content TEXT NOT NULL,
+        excerpt TEXT,
+        tags TEXT[] DEFAULT '{}',
+        author VARCHAR(255) DEFAULT 'Admin',
+        author_id INTEGER REFERENCES users(id),
+        published BOOLEAN DEFAULT FALSE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('Posts table ready');
+  } catch (e: any) {
+    console.error('Posts table error:', e.message);
+  }
+
+  // Add missing columns to posts
   try {
     await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author_id INTEGER REFERENCES users(id);`);
   } catch (e) { /* ignore */ }
-
   try {
     await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';`);
   } catch (e) { /* ignore */ }
-  
   try {
     await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author VARCHAR(255) DEFAULT 'Admin';`);
   } catch (e) { /* ignore */ }
 
-  console.log('Tables created/migrated successfully');
+  // Create subscribers table
+  try {
+    await query(`
+      CREATE TABLE IF NOT EXISTS subscribers (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log('Subscribers table ready');
+  } catch (e: any) {
+    console.error('Subscribers table error:', e.message);
+  }
+
+  console.log('Migration complete');
 }
 
-// Initialize tables - will be called on first run
-createTables().catch(console.error);
+// Run migration on startup
+migrate().catch(console.error);
+
