@@ -43,6 +43,19 @@ export async function createTables() {
     );
   `);
 
+  // Add missing columns if they don't exist
+  try {
+    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}';`);
+  } catch (e) {
+    // Column might already exist
+  }
+  
+  try {
+    await query(`ALTER TABLE posts ADD COLUMN IF NOT EXISTS author VARCHAR(255) DEFAULT 'Admin';`);
+  } catch (e) {
+    // Column might already exist
+  }
+
   // Create subscribers table for newsletter
   await query(`
     CREATE TABLE IF NOT EXISTS subscribers (
@@ -52,7 +65,7 @@ export async function createTables() {
     );
   `);
 
-  console.log('Tables created successfully');
+  console.log('Tables created/migrated successfully');
 }
 
 // Initialize tables - will be called on first run
