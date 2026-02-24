@@ -6,11 +6,12 @@ import { Footer } from "@/components/Footer";
 export const dynamic = 'force-dynamic';
 
 interface Props {
-  searchParams: { q?: string };
+  searchParams: Promise<{ q?: string }>;
 }
 
 export default async function SearchPage({ searchParams }: Props) {
-  const query = decodeURIComponent(searchParams.q || "");
+  const params = await searchParams;
+  const query = decodeURIComponent(params.q || "");
   const posts = await searchPosts(query);
 
   return (

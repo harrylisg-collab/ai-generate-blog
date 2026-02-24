@@ -92,16 +92,16 @@ export async function getAdjacentPosts(currentSlug: string): Promise<{ prev: Pos
   const currentPost = await getPostBySlug(currentSlug);
   if (!currentPost) return { prev: null, next: null };
 
-  // Get previous post (newer)
+  // Get previous post (newer - created after current)
   const prevResult = await dbQuery(
-    'SELECT * FROM posts WHERE published = true AND created_at > $1 ORDER BY created_at ASC LIMIT 1',
-    [currentPost.created_at]
+    'SELECT * FROM posts WHERE published = true AND id != $1 AND created_at > $2 ORDER BY created_at ASC LIMIT 1',
+    [currentPost.id, currentPost.created_at]
   );
 
-  // Get next post (older)
+  // Get next post (older - created before current)
   const nextResult = await dbQuery(
-    'SELECT * FROM posts WHERE published = true AND created_at < $1 ORDER BY created_at DESC LIMIT 1',
-    [currentPost.created_at]
+    'SELECT * FROM posts WHERE published = true AND id != $1 AND created_at < $2 ORDER BY created_at DESC LIMIT 1',
+    [currentPost.id, currentPost.created_at]
   );
 
   return {
