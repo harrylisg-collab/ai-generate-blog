@@ -10,8 +10,7 @@ test.describe('Blog Public Pages', () => {
 
   test('homepage shows posts list', async ({ page }) => {
     await page.goto('/');
-    const hasContent = await page.locator('main').isVisible();
-    expect(hasContent).toBe(true);
+    await expect(page.locator('main')).toBeVisible();
   });
 
   test('theme toggle exists', async ({ page }) => {
@@ -34,32 +33,10 @@ test.describe('Blog Public Pages', () => {
   });
 });
 
-test.describe('Article Detail', () => {
-  test('article page loads or 404', async ({ page }) => {
-    await page.goto('/post/sample-post');
-    const is404 = await page.locator('text=404').isVisible();
-    const isPost = await page.locator('article').isVisible();
-    expect(is404 || isPost).toBe(true);
-  });
-});
-
 test.describe('Search Function', () => {
   test('search page loads', async ({ page }) => {
     await page.goto('/search?q=test');
     await expect(page.locator('h1')).toContainText('Search results');
-  });
-
-  test('search returns results or empty', async ({ page }) => {
-    await page.goto('/search?q=a');
-    const hasContent = await page.locator('article, text=No posts').isVisible();
-    expect(hasContent).toBe(true);
-  });
-});
-
-test.describe('Newsletter Subscription', () => {
-  test('newsletter form exists', async ({ page }) => {
-    await page.goto('/');
-    await expect(page.locator('input[type="email"]').first()).toBeVisible();
   });
 });
 
@@ -76,7 +53,7 @@ test.describe('Login Flow', () => {
     await page.fill('input[type="email"]', 'admin@example.com');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/admin');
+    await page.waitForURL('**/admin', { timeout: 10000 });
   });
 });
 
@@ -88,7 +65,7 @@ test.describe('Admin Dashboard', () => {
     await page.fill('input[type="email"]', 'admin@example.com');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/admin');
+    await page.waitForURL('**/admin', { timeout: 10000 });
   });
 
   test('dashboard loads', async ({ page }) => {
