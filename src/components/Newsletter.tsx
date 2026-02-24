@@ -35,8 +35,8 @@ export function Newsletter() {
   };
 
   return (
-    <div style={{ marginTop: '3rem', padding: '2rem', background: 'var(--color-surface)', borderRadius: '8px', border: '1px solid var(--color-border)' }}>
-      <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', marginBottom: '0.5rem' }}>
+    <div style={{ marginTop: '2rem', padding: '1.5rem 0' }}>
+      <h3 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.1rem', marginBottom: '0.5rem' }}>
         Subscribe to Newsletter
       </h3>
       <p style={{ color: 'var(--color-secondary)', fontSize: '0.9rem', marginBottom: '1rem' }}>
@@ -44,7 +44,27 @@ export function Newsletter() {
       </p>
       
       {status === "success" ? (
-        <p style={{ color: '#16a34a', fontSize: '0.9rem' }}>{message}</p>
+        <div style={{ 
+          padding: '1rem', 
+          background: '#dcfce7', 
+          borderRadius: '4px',
+          color: '#16a34a',
+          fontSize: '0.9rem',
+          fontWeight: 500
+        }}>
+          ✓ {message}
+        </div>
+      ) : status === "error" ? (
+        <div style={{ 
+          padding: '1rem', 
+          background: '#fee2e2', 
+          borderRadius: '4px',
+          color: '#dc2626',
+          fontSize: '0.9rem',
+          fontWeight: 500
+        }}>
+          ✕ {message}
+        </div>
       ) : (
         <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '0.5rem' }}>
           <input
@@ -56,8 +76,9 @@ export function Newsletter() {
             disabled={status === "loading"}
             style={{
               flex: 1,
-              padding: '0.75rem',
-              fontSize: '1rem',
+              maxWidth: '300px',
+              padding: '0.6rem 0.75rem',
+              fontSize: '0.9rem',
               border: '1px solid var(--color-border)',
               borderRadius: '4px',
               background: 'var(--color-background)',
@@ -68,8 +89,8 @@ export function Newsletter() {
             type="submit"
             disabled={status === "loading"}
             style={{
-              padding: '0.75rem 1.5rem',
-              fontSize: '1rem',
+              padding: '0.6rem 1rem',
+              fontSize: '0.9rem',
               fontWeight: 500,
               color: '#fff',
               background: 'var(--color-accent)',
@@ -82,10 +103,6 @@ export function Newsletter() {
             {status === "loading" ? "..." : "Subscribe"}
           </button>
         </form>
-      )}
-      
-      {status === "error" && (
-        <p style={{ color: '#dc2626', fontSize: '0.85rem', marginTop: '0.5rem' }}>{message}</p>
       )}
     </div>
   );
