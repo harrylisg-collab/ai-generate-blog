@@ -2,8 +2,21 @@ import { Pool } from 'pg';
 
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
+// Use test database for preview/development, production database for production
+const getConnectionString = () => {
+  const env = process.env.VERCEL_ENV || process.env.NODE_ENV;
+  
+  if (env === 'production') {
+    return process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
+  }
+  
+  // For preview/development, use test database if available
+  return process.env.TEST_POSTGRES_URL_NON_POOLING || process.env.TEST_POSTGRES_URL 
+    || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL;
+};
+
 const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL,
+  connectionString: getConnectionString(),
   ssl: { rejectUnauthorized: false }
 });
 
