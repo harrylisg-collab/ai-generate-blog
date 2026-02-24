@@ -1,37 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Generate Blog System
 
-## Getting Started
+A minimalist, typography-focused blog platform built with Next.js 14+.
 
-First, run the development server:
+## 🌐 URLs
 
+| Environment | URL |
+|------------|-----|
+| Production | https://ai-generate-blog.vercel.app |
+| Test/Preview | https://ai-generate-blog-test.vercel.app |
+
+## 🔐 Test Accounts
+
+### Admin Account
+- **Email**: admin@example.com
+- **Password**: admin123
+- **Role**: admin
+
+### Test Users
+- **Email**: test@example.com
+- **Password**: test123
+- **Role**: author
+
+> ⚠️ **Note**: These credentials are for testing only. In production, use secure passwords!
+
+## 🧪 Testing
+
+### Unit Tests
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run test        # Run unit tests
+npm run test:run   # Run tests once
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### E2E Tests (Playwright)
+```bash
+npm run test:e2e        # Run E2E tests
+npm run test:e2e:ui    # Run E2E tests in UI mode
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Test Credentials
+The E2E tests use these credentials:
+- **Email**: admin@example.com
+- **Password**: admin123
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🛠️ Development
 
-## Learn More
+### Local Setup
+```bash
+npm install
+npm run dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+### Database
+- Preview/Test environment uses TEST_POSTGRES_URL
+- Production uses POSTGRES_URL
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Build
+```bash
+npm run build
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📁 Project Structure
 
-## Deploy on Vercel
+```
+├── src/
+│   ├── app/           # Next.js pages
+│   ├── components/    # React components
+│   ├── lib/           # Database & utilities
+│   └── test/          # Unit tests
+├── tests/             # E2E tests (Playwright)
+├── docs/              # Design documents
+└── playwright.config.ts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📝 Features
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-# Test
+- [x] Markdown blog posts
+- [x] Admin dashboard
+- [x] User management (multi-user)
+- [x] Newsletter subscription
+- [x] RSS feed
+- [x] Sitemap
+- [x] Light/Dark theme
+- [x] Code syntax highlighting
+- [x] Reading time
+- [x] Social sharing
+- [x] Tags/Categories
+- [x] Search
+
+## 📄 License
+
+MIT
