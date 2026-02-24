@@ -1,8 +1,16 @@
 import Link from "next/link";
-import { getAllPosts } from "@/lib/posts";
 import { Header } from "@/components/Header";
 
-export const revalidate = 0;
+export const dynamic = 'force-dynamic';
+
+interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  published: boolean;
+  created_at: string;
+}
 
 interface Subscriber {
   id: number;
@@ -10,22 +18,45 @@ interface Subscriber {
   created_at: string;
 }
 
+async function getPosts(): Promise<Post[]> {
+  try {
+    // Try direct DB query first
+    const { query } = await import('@/lib/db');
+    const result = await query('SELECT id, title, slug, excerpt, published, created_at FROM posts ORDER BY created_at DESC');
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching posts from DB:', error);
+    // Fallback: try API
+    try {
+      const siteUrl = process.env.NEXTAUTH_URL || 'https://ai-generate-blog.vercel.app';
+      const res = await fetch(`${siteUrl}/api/admin/posts`, { cache: 'no-store' });
+      if (res.ok) {
+        return res.json();
+      }
+    } catch (apiError) {
+      console.error('Error fetching posts from API:', apiError);
+    }
+    return [];
+  }
+}
+
 async function getSubscribers(): Promise<Subscriber[]> {
   try {
-    const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
-    const res = await fetch(`${siteUrl}/api/subscribers`, { 
-      cache: 'no-store' 
-    });
-    if (!res.ok) return [];
-    return res.json();
-  } catch {
+    const { query } = await import('@/lib/db');
+    const result = await query('SELECT id, email, created_at FROM subscribers ORDER BY created_at DESC');
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching subscribers:', error);
     return [];
   }
 }
 
 export default async function AdminDashboard() {
-  const posts = await getAllPosts();
+  const posts = await getPosts();
   const subscribers = await getSubscribers();
+
+  console.log('[Admin] Posts loaded:', posts.length);
+  console.log('[Admin] Subscribers loaded:', subscribers.length);
 
   return (
     <AdminClient posts={posts} subscribers={subscribers} />
@@ -46,7 +77,7 @@ function AdminHeader() {
 
 import { useState } from "react";
 
-interface Post {
+interface ClientPost {
   id: number;
   title: string;
   slug: string;
@@ -55,15 +86,15 @@ interface Post {
   created_at: string;
 }
 
-interface Subscriber {
+interface ClientSubscriber {
   id: number;
   email: string;
   created_at: string;
 }
 
 interface ClientProps {
-  posts: Post[];
-  subscribers: Subscriber[];
+  posts: ClientPost[];
+  subscribers: ClientSubscriber[];
 }
 
 export default function AdminClient({ posts: initialPosts, subscribers: initialSubscribers }: ClientProps) {
