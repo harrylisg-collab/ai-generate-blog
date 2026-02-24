@@ -88,6 +88,28 @@ export async function getPostById(id: number): Promise<Post | null> {
   return result.rows[0] || null;
 }
 
+export async function getAdjacentPosts(currentSlug: string): Promise<{ prev: Post | null; next: Post | null }> {
+  const currentPost = await getPostBySlug(currentSlug);
+  if (!currentPost) return { prev: null, next: null };
+
+  // Get previous post (newer)
+  const prevResult = await dbQuery(
+    'SELECT * FROM posts WHERE published = true AND created_at > $1 ORDER BY created_at ASC LIMIT 1',
+    [currentPost.created_at]
+  );
+
+  // Get next post (older)
+  const nextResult = await dbQuery(
+    'SELECT * FROM posts WHERE published = true AND created_at < $1 ORDER BY created_at DESC LIMIT 1',
+    [currentPost.created_at]
+  );
+
+  return {
+    prev: prevResult.rows[0] || null,
+    next: nextResult.rows[0] || null,
+  };
+}
+
 export async function searchPosts(query: string): Promise<Post[]> {
   const result = await dbQuery(
     `SELECT * FROM posts 

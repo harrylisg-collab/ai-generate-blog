@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { getPostBySlug } from "@/lib/posts";
+import { getPostBySlug, getAdjacentPosts } from "@/lib/posts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import { MarkdownContent } from "@/components/MarkdownContent";
@@ -41,6 +41,7 @@ export default async function PostPage({ params }: Props) {
     notFound();
   }
 
+  const { prev, next } = await getAdjacentPosts(slug);
   const readingTime = Math.ceil(post.content.split(/\s+/).length / 200);
   const siteUrl = process.env.NEXTAUTH_URL || 'https://example.com';
   const postUrl = `${siteUrl}/post/${post.slug}`;
@@ -105,6 +106,24 @@ export default async function PostPage({ params }: Props) {
           <div className="markdown-content" style={{ lineHeight: 1.8, paddingBottom: '2rem' }}>
             <MarkdownContent content={post.content} />
           </div>
+
+          {/* Previous / Next Navigation */}
+          {(prev || next) && (
+            <nav style={{ display: 'flex', justifyContent: 'space-between', paddingTop: '2rem', borderTop: '1px solid var(--color-border)', marginTop: '2rem' }}>
+              {prev ? (
+                <Link href={`/post/${prev.slug}`} style={{ textAlign: 'left', maxWidth: '45%' }}>
+                  <span style={{ color: 'var(--color-secondary)', fontSize: '0.85rem' }}>← Newer</span>
+                  <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{prev.title}</div>
+                </Link>
+              ) : <div />}
+              {next ? (
+                <Link href={`/post/${next.slug}`} style={{ textAlign: 'right', maxWidth: '45%' }}>
+                  <span style={{ color: 'var(--color-secondary)', fontSize: '0.85rem' }}>Older →</span>
+                  <div style={{ fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{next.title}</div>
+                </Link>
+              ) : <div />}
+            </nav>
+          )}
         </article>
       </main>
       <Footer />
