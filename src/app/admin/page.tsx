@@ -1,5 +1,6 @@
 // Server-side data fetching
 import Link from "next/link";
+import AdminClient from "@/components/AdminClient";
 
 export const dynamic = 'force-dynamic';
 
@@ -46,16 +47,3 @@ export default async function AdminDashboard() {
 
   return <AdminClient posts={posts} subscribers={subscribers} />;
 }
-
-function AdminHeader() {
-  return (
-    <header className="container" style={{ paddingTop: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)' }}>
-      <Link href="/" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 600 }}>
-        AI Generate Blog System
-      </Link>
-    </header>
-  );
-}
-
-// Client component - imported dynamically
-import AdminClient from './AdminClient';
