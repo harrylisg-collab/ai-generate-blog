@@ -1,24 +1,28 @@
 import Link from "next/link";
-import { getPublishedPosts } from "@/lib/posts";
+import { searchPosts } from "@/lib/posts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
-import { TagList } from "@/components/TagList";
 
-export const revalidate = 0;
+interface Props {
+  searchParams: { q?: string };
+}
 
-export default async function Home() {
-  const posts = await getPublishedPosts();
+export default async function SearchPage({ searchParams }: Props) {
+  const query = decodeURIComponent(searchParams.q || "");
+  const posts = await searchPosts(query);
 
   return (
     <div className="min-h-screen">
       <Header />
       <main className="container">
+        <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '2rem', marginBottom: '2rem' }}>
+          Search results for "{query}"
+        </h1>
+
         {posts.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '4rem 0', color: 'var(--color-secondary)' }}>
-            <p>No posts yet.</p>
-          </div>
+          <p style={{ color: 'var(--color-secondary)' }}>No posts found matching your search.</p>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', paddingBottom: '2rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3rem', paddingBottom: '4rem' }}>
             {posts.map((post) => (
               <article key={post.id}>
                 <Link 
@@ -35,20 +39,20 @@ export default async function Home() {
                     month: 'long',
                     day: 'numeric'
                   })}
-                  {post.excerpt && (
-                    <span> · {Math.ceil(post.excerpt.split(/\s+/).length / 200)} min read</span>
-                  )}
                 </div>
                 {post.excerpt && (
                   <p style={{ color: 'var(--color-secondary)', lineHeight: 1.6, marginTop: '0.5rem' }}>
                     {post.excerpt}
                   </p>
                 )}
-                {post.tags && post.tags.length > 0 && <TagList tags={post.tags} />}
               </article>
             ))}
           </div>
         )}
+
+        <Link href="/" style={{ color: 'var(--color-secondary)' }}>
+          ← Back to all posts
+        </Link>
       </main>
       <Footer />
     </div>

@@ -1,4 +1,4 @@
-import { query } from './db';
+import { query as dbQuery } from './db';
 
 export interface Post {
   id: number;
@@ -6,26 +6,40 @@ export interface Post {
   slug: string;
   content: string;
   excerpt: string | null;
+  tags: string[];
   published: boolean;
   created_at: string;
   updated_at: string;
 }
 
 export async function getPublishedPosts(): Promise<Post[]> {
-  const result = await query(
+  const result = await dbQuery(
     'SELECT * FROM posts WHERE published = true ORDER BY created_at DESC'
   );
   return result.rows;
 }
 
 export async function getPostBySlug(slug: string): Promise<Post | null> {
-  const result = await query('SELECT * FROM posts WHERE slug = $1', [slug]);
+  const result = await dbQuery('SELECT * FROM posts WHERE slug = $1', [slug]);
   return result.rows[0] || null;
 }
 
 export async function getAllPosts(): Promise<Post[]> {
-  const result = await query('SELECT * FROM posts ORDER BY created_at DESC');
+  const result = await dbQuery('SELECT * FROM posts ORDER BY created_at DESC');
   return result.rows;
+}
+
+export async function getPostsByTag(tag: string): Promise<Post[]> {
+  const result = await dbQuery(
+    'SELECT * FROM posts WHERE $1 = ANY(tags) AND published = true ORDER BY created_at DESC',
+    [tag]
+  );
+  return result.rows;
+}
+
+export async function getAllTags(): Promise<string[]> {
+  const result = await dbQuery('SELECT DISTINCT unnest(tags) as tag FROM posts WHERE published = true');
+  return result.rows.map(row => row.tag);
 }
 
 export async function createPost(
@@ -33,11 +47,12 @@ export async function createPost(
   content: string,
   slug: string,
   excerpt: string | null = null,
+  tags: string[] = [],
   published: boolean = false
 ): Promise<Post> {
-  const result = await query(
-    'INSERT INTO posts (title, content, slug, excerpt, published) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-    [title, content, slug, excerpt, published]
+  const result = await dbQuery(
+    'INSERT INTO posts (title, content, slug, excerpt, tags, published) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+    [title, content, slug, excerpt, tags, published]
   );
   return result.rows[0];
 }
@@ -48,23 +63,38 @@ export async function updatePost(
   content: string,
   slug: string,
   excerpt: string | null = null,
+  tags: string[] = [],
   published: boolean = false
 ): Promise<Post> {
-  const result = await query(
+  const result = await dbQuery(
     `UPDATE posts 
-     SET title = $1, content = $2, slug = $3, excerpt = $4, published = $5, updated_at = CURRENT_TIMESTAMP
-     WHERE id = $6
+     SET title = $1, content = $2, slug = $3, excerpt = $4, tags = $5, published = $6, updated_at = CURRENT_TIMESTAMP
+     WHERE id = $7
      RETURNING *`,
-    [title, content, slug, excerpt, published, id]
+    [title, content, slug, excerpt, tags, published, id]
   );
   return result.rows[0];
 }
 
 export async function deletePost(id: number): Promise<void> {
-  await query('DELETE FROM posts WHERE id = $1', [id]);
+  await dbQuery('DELETE FROM posts WHERE id = $1', [id]);
 }
 
 export async function getPostById(id: number): Promise<Post | null> {
-  const result = await query('SELECT * FROM posts WHERE id = $1', [id]);
+  const result = await dbQuery('SELECT * FROM posts WHERE id = $1', [id]);
   return result.rows[0] || null;
+}
+
+export async function searchPosts(query: string): Promise<Post[]> {
+  const result = await dbQuery(
+    `SELECT * FROM posts 
+     WHERE published = true AND (
+       title ILIKE $1 OR 
+       content ILIKE $1 OR 
+       excerpt ILIKE $1
+     ) 
+     ORDER BY created_at DESC`,
+    [`%${query}%`]
+  );
+  return result.rows;
 }
