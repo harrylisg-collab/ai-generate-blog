@@ -1,8 +1,8 @@
-"use client";
-
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { getAllPosts } from "@/lib/posts";
+import { Header } from "@/components/Header";
+
+export const revalidate = 0;
 
 interface Subscriber {
   id: number;
@@ -10,43 +10,77 @@ interface Subscriber {
   created_at: string;
 }
 
-export default function AdminDashboard() {
-  const router = useRouter();
+async function getSubscribers(): Promise<Subscriber[]> {
+  try {
+    const siteUrl = process.env.NEXTAUTH_URL || 'http://localhost:3000';
+    const res = await fetch(`${siteUrl}/api/subscribers`, { 
+      cache: 'no-store' 
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
+}
+
+export default async function AdminDashboard() {
+  const posts = await getAllPosts();
+  const subscribers = await getSubscribers();
+
+  return (
+    <AdminClient posts={posts} subscribers={subscribers} />
+  );
+}
+
+function AdminHeader() {
+  return (
+    <header className="container" style={{ paddingTop: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)' }}>
+      <Link href="/" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 600 }}>
+        AI Generate Blog System
+      </Link>
+    </header>
+  );
+}
+
+"use client";
+
+import { useState } from "react";
+
+interface Post {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  published: boolean;
+  created_at: string;
+}
+
+interface Subscriber {
+  id: number;
+  email: string;
+  created_at: string;
+}
+
+interface ClientProps {
+  posts: Post[];
+  subscribers: Subscriber[];
+}
+
+export default function AdminClient({ posts: initialPosts, subscribers: initialSubscribers }: ClientProps) {
   const [tab, setTab] = useState<"posts" | "subscribers">("posts");
-  const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-  const [loadingSubs, setLoadingSubs] = useState(false);
-
-  const loadSubscribers = async () => {
-    if (subscribers.length > 0) return;
-    setLoadingSubs(true);
-    try {
-      const res = await fetch("/api/subscribers");
-      const data = await res.json();
-      setSubscribers(data);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingSubs(false);
-    }
-  };
-
-  const handleTabChange = (newTab: "posts" | "subscribers") => {
-    setTab(newTab);
-    if (newTab === "subscribers") {
-      loadSubscribers();
-    }
-  };
+  const [posts] = useState(initialPosts);
+  const [subscribers] = useState(initialSubscribers);
 
   return (
     <div className="min-h-screen">
-      <Header />
+      <AdminHeader />
       <div style={{ display: 'flex' }}>
         <aside style={{ width: '250px', background: 'var(--color-surface)', borderRight: '1px solid var(--color-border)', padding: '1.5rem', position: 'fixed', height: '100vh' }}>
           <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', marginBottom: '2rem' }}>Admin</h2>
           
           <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             <button 
-              onClick={() => handleTabChange("posts")}
+              onClick={() => setTab("posts")}
               style={{ 
                 padding: '0.5rem 0.75rem', 
                 borderRadius: '4px', 
@@ -61,7 +95,7 @@ export default function AdminDashboard() {
               Posts
             </button>
             <button 
-              onClick={() => handleTabChange("subscribers")}
+              onClick={() => setTab("subscribers")}
               style={{ 
                 padding: '0.5rem 0.75rem', 
                 borderRadius: '4px', 
@@ -92,14 +126,44 @@ export default function AdminDashboard() {
                 <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem' }}>All Posts</h1>
                 <Link href="/admin/new" className="btn-primary">New Post</Link>
               </div>
-              <p style={{ color: 'var(--color-secondary)' }}>Posts content loaded from server component...</p>
+              {posts.length === 0 ? (
+                <p style={{ color: 'var(--color-secondary)' }}>No posts yet. <Link href="/admin/new" style={{ textDecoration: 'underline' }}>Create your first post</Link></p>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid var(--color-border)' }}>
+                      <th style={{ textAlign: 'left', padding: '0.75rem 0', fontWeight: 500 }}>Title</th>
+                      <th style={{ textAlign: 'left', padding: '0.75rem 0', fontWeight: 500 }}>Status</th>
+                      <th style={{ textAlign: 'left', padding: '0.75rem 0', fontWeight: 500 }}>Date</th>
+                      <th style={{ textAlign: 'right', padding: '0.75rem 0', fontWeight: 500 }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {posts.map((post) => (
+                      <tr key={post.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
+                        <td style={{ padding: '1rem 0' }}><Link href={`/admin/edit/${post.id}`} style={{ fontWeight: 500 }}>{post.title}</Link></td>
+                        <td style={{ padding: '1rem 0' }}>
+                          <span style={{ display: 'inline-block', padding: '0.25rem 0.5rem', fontSize: '0.75rem', borderRadius: '4px' }} className={post.published ? 'badge-published' : 'badge-draft'}>
+                            {post.published ? 'Published' : 'Draft'}
+                          </span>
+                        </td>
+                        <td style={{ padding: '1rem 0', color: 'var(--color-secondary)', fontSize: '0.9rem' }}>
+                          {new Date(post.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </td>
+                        <td style={{ padding: '1rem 0', textAlign: 'right' }}>
+                          <Link href={`/admin/edit/${post.id}`} style={{ marginRight: '1rem', color: 'var(--color-secondary)', fontSize: '0.9rem' }}>Edit</Link>
+                          {post.published && <Link href={`/post/${post.slug}`} target="_blank" style={{ color: 'var(--color-secondary)', fontSize: '0.9rem' }}>View</Link>}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </>
           ) : (
             <>
               <h1 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.75rem', marginBottom: '2rem' }}>Subscribers</h1>
-              {loadingSubs ? (
-                <p>Loading...</p>
-              ) : subscribers.length === 0 ? (
+              {subscribers.length === 0 ? (
                 <p style={{ color: 'var(--color-secondary)' }}>No subscribers yet.</p>
               ) : (
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -114,11 +178,7 @@ export default function AdminDashboard() {
                       <tr key={sub.id} style={{ borderBottom: '1px solid var(--color-border)' }}>
                         <td style={{ padding: '1rem 0' }}>{sub.email}</td>
                         <td style={{ padding: '1rem 0', color: 'var(--color-secondary)', fontSize: '0.9rem' }}>
-                          {new Date(sub.created_at).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric'
-                          })}
+                          {new Date(sub.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                         </td>
                       </tr>
                     ))}
@@ -130,15 +190,5 @@ export default function AdminDashboard() {
         </main>
       </div>
     </div>
-  );
-}
-
-function Header() {
-  return (
-    <header className="container" style={{ paddingTop: '1rem', paddingBottom: '1rem', borderBottom: '1px solid var(--color-border)' }}>
-      <Link href="/" style={{ fontFamily: 'var(--font-heading)', fontSize: '1.25rem', fontWeight: 600 }}>
-        AI Generate Blog System
-      </Link>
-    </header>
   );
 }
