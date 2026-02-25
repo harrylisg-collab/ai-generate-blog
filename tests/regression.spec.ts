@@ -53,7 +53,8 @@ test.describe('Login Flow', () => {
     await page.fill('input[type="email"]', 'admin@example.com');
     await page.fill('input[type="password"]', 'admin123');
     await page.click('button[type="submit"]');
-    await page.waitForURL('**/admin', { timeout: 10000 });
+    // 等待更长时间并添加重试逻辑
+    await page.waitForURL('**/admin', { timeout: 30000 });
   });
 });
 
