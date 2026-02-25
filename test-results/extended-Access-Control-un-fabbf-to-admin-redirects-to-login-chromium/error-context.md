@@ -1,0 +1,46 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - link "AI Generate Blog System" [ref=e4] [cursor=pointer]:
+        - /url: /
+    - generic [ref=e5]:
+      - complementary [ref=e6]:
+        - heading "Admin" [level=2] [ref=e7]
+        - navigation [ref=e8]:
+          - button "Posts" [ref=e9] [cursor=pointer]
+          - button "Subscribers" [ref=e10] [cursor=pointer]
+          - button "Users" [ref=e11] [cursor=pointer]
+          - link "+ New Post" [ref=e12] [cursor=pointer]:
+            - /url: /admin/new
+        - link "← View Blog" [ref=e14] [cursor=pointer]:
+          - /url: /
+      - main [ref=e15]:
+        - generic [ref=e16]:
+          - heading "All Posts" [level=1] [ref=e17]
+          - link "New Post" [ref=e18] [cursor=pointer]:
+            - /url: /admin/new
+        - table [ref=e19]:
+          - rowgroup [ref=e20]:
+            - row "Title Status Date Actions" [ref=e21]:
+              - columnheader "Title" [ref=e22]
+              - columnheader "Status" [ref=e23]
+              - columnheader "Date" [ref=e24]
+              - columnheader "Actions" [ref=e25]
+          - rowgroup [ref=e26]:
+            - row "Test Article from Preview Published Feb 24, 2026 EditView" [ref=e27]:
+              - cell "Test Article from Preview" [ref=e28]:
+                - link "Test Article from Preview" [ref=e29] [cursor=pointer]:
+                  - /url: /admin/edit/1
+              - cell "Published" [ref=e30]:
+                - generic [ref=e31]: Published
+              - cell "Feb 24, 2026" [ref=e32]
+              - cell "EditView" [ref=e33]:
+                - link "Edit" [ref=e34] [cursor=pointer]:
+                  - /url: /admin/edit/1
+                - link "View" [ref=e35] [cursor=pointer]:
+                  - /url: /post/test-preview-article
+  - alert [ref=e36]
+```

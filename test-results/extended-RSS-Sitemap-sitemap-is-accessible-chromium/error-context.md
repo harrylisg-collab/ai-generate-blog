@@ -1,0 +1,49 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]: This XML file does not appear to have any style information associated with it. The document tree is shown below.
+  - generic [ref=e4]:
+    - generic [ref=e7]:
+      - text: <urlset
+      - generic [ref=e8]: xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+      - text: ">"
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - generic [ref=e13]: <url>
+        - generic [ref=e14]:
+          - generic [ref=e15]:
+            - generic [ref=e16]: <loc>
+            - text: https://ai-generate-blog-test.vercel.app
+            - generic [ref=e17]: </loc>
+          - generic [ref=e18]:
+            - generic [ref=e19]: <changefreq>
+            - text: daily
+            - generic [ref=e20]: </changefreq>
+          - generic [ref=e21]:
+            - generic [ref=e22]: <priority>
+            - text: "1.0"
+            - generic [ref=e23]: </priority>
+        - generic [ref=e25]: </url>
+      - generic [ref=e26]:
+        - generic [ref=e29]: <url>
+        - generic [ref=e30]:
+          - generic [ref=e31]:
+            - generic [ref=e32]: <loc>
+            - text: https://ai-generate-blog-test.vercel.app/post/test-preview-article
+            - generic [ref=e33]: </loc>
+          - generic [ref=e34]:
+            - generic [ref=e35]: <lastmod>
+            - text: 2026-02-24T13:42:34.938Z
+            - generic [ref=e36]: </lastmod>
+          - generic [ref=e37]:
+            - generic [ref=e38]: <changefreq>
+            - text: weekly
+            - generic [ref=e39]: </changefreq>
+          - generic [ref=e40]:
+            - generic [ref=e41]: <priority>
+            - text: "0.8"
+            - generic [ref=e42]: </priority>
+        - generic [ref=e44]: </url>
+    - generic [ref=e46]: </urlset>
+```
