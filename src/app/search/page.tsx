@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { searchPosts } from "@/lib/posts";
+import { searchPosts, Post } from "@/lib/posts";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -12,7 +12,14 @@ interface Props {
 export default async function SearchPage({ searchParams }: Props) {
   const params = await searchParams;
   const query = decodeURIComponent(params.q || "");
-  const posts = await searchPosts(query);
+  
+  let posts: Post[] = [];
+  try {
+    posts = await searchPosts(query);
+  } catch (error) {
+    console.error('Search error:', error);
+    // Continue with empty results on error
+  }
 
   return (
     <div className="min-h-screen">

@@ -254,8 +254,8 @@ test.describe('Mobile Responsiveness', () => {
 test.describe('Access Control', () => {
   test('unauthorized access to admin redirects to login', async ({ page }) => {
     await page.goto('/admin');
-    // Should redirect to login or show login
-    await expect(page).toHaveURL(/.*\/admin\/login|.*\/admin\?.*login/);
+    // Should redirect to login (307 -> /admin/login)
+    await expect(page).toHaveURL(/.*\/admin\/login/);
   });
 
   test('unauthorized access to admin posts redirects to login', async ({ page }) => {
